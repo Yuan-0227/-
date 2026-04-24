@@ -1,0 +1,2999 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>校园失物招领小程序 UI 交互演示</title>
+  <style>
+    :root {
+      --stage-bg: #eaf0fa;
+      --phone-border: rgba(22, 32, 51, 0.12);
+      --primary-color: #356adf;
+      --primary-light: #5f8df2;
+      --success-color: #34c38f;
+      --warning-color: #f6ab54;
+      --error-color: #ff6e7f;
+      --info-color: #49b5ff;
+      --page-gradient: linear-gradient(180deg, #f7f9fc 0%, #f2f5fa 100%);
+      --card-bg: #ffffff;
+      --surface-soft: #f7f9fc;
+      --surface-tint: rgba(53, 106, 223, 0.1);
+      --text-color: #162033;
+      --text-secondary: #5d6a7e;
+      --text-placeholder: #8b97a8;
+      --border-color: rgba(32, 48, 76, 0.1);
+      --line-soft: rgba(32, 48, 76, 0.08);
+      --shadow: 0 12px 32px rgba(32, 48, 76, 0.08);
+      --shadow-soft: 0 6px 18px rgba(32, 48, 76, 0.06);
+      --shadow-strong: 0 24px 64px rgba(32, 48, 76, 0.16);
+      --safe-bottom: 18px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      min-height: 100%;
+    }
+
+    body {
+      color: var(--text-color);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background:
+        linear-gradient(135deg, rgba(53, 106, 223, 0.08), transparent 34%),
+        linear-gradient(315deg, rgba(73, 181, 255, 0.10), transparent 32%),
+        var(--stage-bg);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    button,
+    input,
+    textarea,
+    select {
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .stage {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 18px;
+    }
+
+    .phone {
+      width: min(420px, calc(100vw - 24px));
+      height: min(900px, calc(100vh - 36px));
+      min-height: 720px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      border: 1px solid var(--phone-border);
+      border-radius: 34px;
+      background: var(--page-gradient);
+      box-shadow: var(--shadow-strong);
+    }
+
+    .phone.dark {
+      --stage-bg: #070d18;
+      --phone-border: rgba(255, 255, 255, 0.10);
+      --primary-color: #7aa8ff;
+      --primary-light: #9dc1ff;
+      --success-color: #49d7a3;
+      --warning-color: #f8bf69;
+      --error-color: #ff8694;
+      --info-color: #65c3ff;
+      --page-gradient: linear-gradient(180deg, #10192e 0%, #0c1222 48%, #131d34 100%);
+      --card-bg: rgba(22, 31, 54, 0.94);
+      --surface-soft: rgba(255, 255, 255, 0.06);
+      --surface-tint: rgba(122, 168, 255, 0.14);
+      --text-color: #f5f8ff;
+      --text-secondary: #b9c6e0;
+      --text-placeholder: #7e8da9;
+      --border-color: rgba(255, 255, 255, 0.1);
+      --line-soft: rgba(255, 255, 255, 0.08);
+      --shadow: 0 18px 46px rgba(0, 0, 0, 0.32);
+      --shadow-soft: 0 12px 26px rgba(0, 0, 0, 0.24);
+      --shadow-strong: 0 30px 82px rgba(0, 0, 0, 0.42);
+    }
+
+    .statusbar {
+      height: 34px;
+      flex: 0 0 34px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      color: var(--text-color);
+      font-size: 12px;
+      font-weight: 700;
+      background: rgba(247, 249, 252, 0.82);
+      backdrop-filter: blur(18px);
+    }
+
+    .phone.dark .statusbar {
+      background: rgba(16, 25, 46, 0.84);
+    }
+
+    .status-icons {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      color: var(--text-secondary);
+    }
+
+    .battery {
+      width: 24px;
+      height: 11px;
+      border: 1.5px solid currentColor;
+      border-radius: 4px;
+      position: relative;
+    }
+
+    .battery::before {
+      content: "";
+      position: absolute;
+      left: 2px;
+      top: 2px;
+      width: 15px;
+      height: 5px;
+      border-radius: 2px;
+      background: currentColor;
+    }
+
+    .battery::after {
+      content: "";
+      position: absolute;
+      right: -4px;
+      top: 3px;
+      width: 2px;
+      height: 5px;
+      border-radius: 1px;
+      background: currentColor;
+    }
+
+    .navtop {
+      height: 56px;
+      flex: 0 0 56px;
+      display: grid;
+      grid-template-columns: 48px 1fr 86px;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      background: rgba(247, 249, 252, 0.92);
+      border-bottom: 1px solid var(--line-soft);
+      backdrop-filter: blur(18px);
+    }
+
+    .phone.dark .navtop {
+      background: rgba(16, 25, 46, 0.92);
+    }
+
+    .nav-title {
+      min-width: 0;
+      text-align: center;
+      font-size: 17px;
+      font-weight: 800;
+      color: var(--text-color);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .icon-btn,
+    .role-btn {
+      min-height: 38px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 18px;
+      color: var(--text-color);
+      background: var(--surface-soft);
+      border: 1px solid var(--line-soft);
+    }
+
+    .icon-btn {
+      width: 38px;
+      font-size: 26px;
+      line-height: 1;
+    }
+
+    .icon-btn.is-disabled {
+      opacity: 0.32;
+      pointer-events: none;
+    }
+
+    .role-btn {
+      gap: 6px;
+      padding: 0 12px;
+      color: var(--primary-color);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .role-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--primary-color);
+    }
+
+    .content {
+      flex: 1;
+      min-height: 0;
+      overflow: auto;
+      padding: 14px 14px 110px;
+      scroll-behavior: smooth;
+      background: var(--page-gradient);
+    }
+
+    .tabbar {
+      flex: 0 0 74px;
+      height: 74px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      padding: 8px 16px calc(var(--safe-bottom) - 4px);
+      background: rgba(248, 251, 255, 0.96);
+      border-top: 1px solid var(--line-soft);
+      box-shadow: 0 -12px 36px rgba(31, 41, 80, 0.08);
+      backdrop-filter: blur(18px);
+    }
+
+    .phone.dark .tabbar {
+      background: rgba(16, 25, 46, 0.96);
+    }
+
+    .tabbar button {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      min-width: 0;
+      border-radius: 16px;
+      color: var(--text-placeholder);
+      background: transparent;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .tabbar button.active {
+      color: var(--primary-color);
+      background: rgba(53, 106, 223, 0.08);
+    }
+
+    .tab-icon {
+      width: 22px;
+      height: 22px;
+      position: relative;
+      display: block;
+      color: currentColor;
+    }
+
+    .tab-icon.home::before {
+      content: "";
+      position: absolute;
+      left: 4px;
+      top: 4px;
+      width: 13px;
+      height: 13px;
+      border-left: 2px solid currentColor;
+      border-top: 2px solid currentColor;
+      border-radius: 3px 0 0 0;
+      transform: rotate(45deg);
+    }
+
+    .tab-icon.home::after {
+      content: "";
+      position: absolute;
+      left: 6px;
+      bottom: 3px;
+      width: 10px;
+      height: 9px;
+      border: 2px solid currentColor;
+      border-top: 0;
+      border-radius: 2px 2px 5px 5px;
+    }
+
+    .tab-icon.publish::before,
+    .tab-icon.publish::after {
+      content: "";
+      position: absolute;
+      left: 4px;
+      top: 10px;
+      width: 14px;
+      height: 2px;
+      border-radius: 999px;
+      background: currentColor;
+    }
+
+    .tab-icon.publish::after {
+      transform: rotate(90deg);
+    }
+
+    .tab-icon.my::before {
+      content: "";
+      position: absolute;
+      left: 7px;
+      top: 3px;
+      width: 8px;
+      height: 8px;
+      border: 2px solid currentColor;
+      border-radius: 50%;
+    }
+
+    .tab-icon.my::after {
+      content: "";
+      position: absolute;
+      left: 4px;
+      bottom: 3px;
+      width: 14px;
+      height: 8px;
+      border: 2px solid currentColor;
+      border-radius: 10px 10px 5px 5px;
+      border-bottom-width: 2px;
+    }
+
+    .toast {
+      position: absolute;
+      left: 50%;
+      top: 94px;
+      z-index: 30;
+      width: min(340px, calc(100% - 36px));
+      transform: translateX(-50%) translateY(-8px);
+      opacity: 0;
+      pointer-events: none;
+      padding: 12px 14px;
+      border-radius: 18px;
+      color: #1f6b50;
+      background: rgba(232, 255, 246, 0.97);
+      border: 1px solid rgba(52, 195, 143, 0.22);
+      box-shadow: 0 16px 36px rgba(38, 108, 80, 0.16);
+      font-size: 13px;
+      font-weight: 800;
+      text-align: center;
+      transition: opacity 0.18s ease, transform 0.18s ease;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .hero,
+    .panel,
+    .item-card,
+    .state-panel,
+    .modal-card,
+    .sheet-card {
+      border-radius: 24px;
+      background: var(--card-bg);
+      border: 1px solid var(--line-soft);
+      box-shadow: var(--shadow);
+    }
+
+    .hero {
+      overflow: hidden;
+      margin-bottom: 14px;
+      padding: 28px 26px 24px;
+      color: #fff;
+      background:
+        radial-gradient(circle at 92% 8%, rgba(255, 255, 255, 0.34), transparent 31%),
+        linear-gradient(135deg, #1f56d9 0%, #3778f6 54%, #70caff 100%);
+      border-color: rgba(255, 255, 255, 0.28);
+      box-shadow: 0 22px 54px rgba(42, 101, 219, 0.24);
+    }
+
+    .hero.alt {
+      color: var(--text-color);
+      background: var(--card-bg);
+      border-top: 4px solid var(--primary-color);
+      box-shadow: var(--shadow);
+    }
+
+    .hero-kicker,
+    .section-kicker {
+      display: inline-flex;
+      align-items: center;
+      min-height: 27px;
+      margin-bottom: 12px;
+      padding: 0 12px;
+      border-radius: 999px;
+      color: #fff;
+      background: rgba(255, 255, 255, 0.18);
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .hero.alt .hero-kicker,
+    .section-kicker {
+      color: var(--primary-color);
+      background: var(--surface-tint);
+      border-color: rgba(53, 106, 223, 0.08);
+    }
+
+    .hero h1,
+    .hero h2 {
+      margin: 0 0 8px;
+      font-size: 26px;
+      line-height: 1.24;
+      font-weight: 800;
+      letter-spacing: 0;
+    }
+
+    .hero p {
+      margin: 0;
+      color: rgba(255, 255, 255, 0.86);
+      font-size: 13px;
+      line-height: 1.68;
+    }
+
+    .hero.alt p {
+      color: var(--text-secondary);
+    }
+
+    .hero-search {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 48px;
+      margin-top: 18px;
+      padding: 0 16px;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.92);
+      border: 1px solid rgba(255, 255, 255, 0.42);
+      color: var(--text-placeholder);
+      font-size: 13px;
+      font-weight: 700;
+      text-align: left;
+    }
+
+    .search-symbol {
+      width: 16px;
+      height: 16px;
+      border: 2px solid currentColor;
+      border-radius: 50%;
+      position: relative;
+      flex: 0 0 16px;
+    }
+
+    .search-symbol::after {
+      content: "";
+      position: absolute;
+      right: -6px;
+      bottom: -5px;
+      width: 8px;
+      height: 2px;
+      border-radius: 2px;
+      background: currentColor;
+      transform: rotate(45deg);
+    }
+
+    .panel {
+      margin-bottom: 14px;
+      padding: 18px;
+    }
+
+    .section-head {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .section-title {
+      margin: 0;
+      font-size: 18px;
+      line-height: 1.3;
+      font-weight: 800;
+      color: var(--text-color);
+    }
+
+    .section-subtitle,
+    .note {
+      color: var(--text-placeholder);
+      font-size: 11px;
+      line-height: 1.45;
+      text-align: right;
+    }
+
+    .summary-grid,
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 9px;
+    }
+
+    .summary-item,
+    .metric-card {
+      position: relative;
+      overflow: hidden;
+      padding: 18px 8px 16px;
+      border-radius: 18px;
+      background: var(--surface-soft);
+      border: 1px solid var(--line-soft);
+      text-align: center;
+    }
+
+    .summary-item::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 18px;
+      right: 18px;
+      height: 5px;
+      border-radius: 0 0 999px 999px;
+      background: linear-gradient(90deg, rgba(93, 141, 255, 0.48), rgba(73, 181, 255, 0.18));
+    }
+
+    .summary-value,
+    .metric-value {
+      margin-bottom: 7px;
+      color: var(--primary-color);
+      font-size: 26px;
+      line-height: 1.1;
+      font-weight: 800;
+    }
+
+    .summary-label,
+    .metric-label {
+      color: var(--text-secondary);
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .tabs,
+    .segmented {
+      display: flex;
+      gap: 0;
+      padding: 6px;
+      border-radius: 18px;
+      background: var(--surface-soft);
+      border: 1px solid var(--line-soft);
+    }
+
+    .tabs button,
+    .segmented button {
+      flex: 1;
+      min-height: 38px;
+      min-width: 0;
+      padding: 0 8px;
+      border-radius: 14px;
+      color: var(--text-secondary);
+      background: transparent;
+      font-size: 13px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .tabs button.active,
+    .segmented button.active {
+      color: #ffffff;
+      background: var(--primary-color);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .chip-row {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 2px;
+      scrollbar-width: none;
+    }
+
+    .chip-row::-webkit-scrollbar {
+      display: none;
+    }
+
+    .filter-chip,
+    .tag {
+      flex: 0 0 auto;
+      min-height: 34px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 13px;
+      border-radius: 14px;
+      color: var(--text-secondary);
+      background: var(--surface-soft);
+      border: 1px solid var(--line-soft);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .filter-chip.active {
+      color: var(--primary-color);
+      background: rgba(93, 141, 255, 0.12);
+      border-color: rgba(93, 141, 255, 0.26);
+    }
+
+    .tag {
+      min-height: 27px;
+      padding: 0 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      border: 0;
+    }
+
+    .tag-blue {
+      color: var(--primary-color);
+      background: rgba(93, 141, 255, 0.13);
+    }
+
+    .tag-orange {
+      color: #c17827;
+      background: rgba(246, 171, 84, 0.16);
+    }
+
+    .tag-green {
+      color: var(--success-color);
+      background: rgba(52, 195, 143, 0.14);
+    }
+
+    .tag-red {
+      color: var(--error-color);
+      background: rgba(255, 110, 127, 0.14);
+    }
+
+    .tag-gray {
+      color: var(--text-secondary);
+      background: rgba(93, 106, 126, 0.12);
+    }
+
+    .list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .item-card {
+      overflow: hidden;
+      padding: 16px;
+    }
+
+    .item-card.item-mine {
+      border-color: rgba(93, 141, 255, 0.30);
+      box-shadow: 0 18px 42px rgba(64, 92, 176, 0.13);
+    }
+
+    .item-source {
+      display: inline-flex;
+      align-items: center;
+      min-height: 26px;
+      margin-bottom: 12px;
+      padding: 0 10px;
+      border-radius: 999px;
+      color: var(--primary-color);
+      background: linear-gradient(135deg, rgba(93, 141, 255, 0.16), rgba(73, 181, 255, 0.12));
+      border: 1px solid rgba(93, 141, 255, 0.22);
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .item-source.other {
+      color: #c17827;
+      background: linear-gradient(135deg, rgba(246, 171, 84, 0.15), rgba(255, 148, 112, 0.1));
+      border-color: rgba(246, 171, 84, 0.22);
+    }
+
+    .item-main {
+      display: grid;
+      grid-template-columns: 64px 1fr;
+      gap: 13px;
+      align-items: flex-start;
+    }
+
+    .thumb {
+      width: 64px;
+      height: 64px;
+      display: grid;
+      place-items: center;
+      border-radius: 18px;
+      color: #fff;
+      background: linear-gradient(135deg, #5f8df2, #70caff);
+      box-shadow: var(--shadow-soft);
+      font-size: 26px;
+      font-weight: 900;
+    }
+
+    .thumb.lost {
+      background: linear-gradient(135deg, #f6ab54, #ff9470);
+    }
+
+    .item-title-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 7px;
+    }
+
+    .item-title {
+      min-width: 0;
+      color: var(--text-color);
+      font-size: 17px;
+      line-height: 1.32;
+      font-weight: 800;
+      word-break: break-word;
+    }
+
+    .item-time {
+      flex: 0 0 auto;
+      padding-top: 3px;
+      color: var(--text-placeholder);
+      font-size: 11px;
+      line-height: 1.4;
+    }
+
+    .item-desc {
+      margin: 0 0 10px;
+      color: var(--text-secondary);
+      font-size: 12px;
+      line-height: 1.68;
+      word-break: break-word;
+    }
+
+    .tag-line {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin-bottom: 12px;
+    }
+
+    .info-list {
+      display: grid;
+      gap: 7px;
+      margin: 12px 0 0;
+    }
+
+    .info-line,
+    .info-box {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      color: var(--text-color);
+      font-size: 12px;
+      line-height: 1.58;
+    }
+
+    .info-line label,
+    .info-box label {
+      flex: 0 0 42px;
+      color: var(--text-placeholder);
+      font-size: 11px;
+    }
+
+    .info-line div,
+    .info-box div {
+      min-width: 0;
+      flex: 1;
+      word-break: break-word;
+    }
+
+    .info-box {
+      display: block;
+      padding: 13px;
+      border-radius: 16px;
+      background: var(--surface-soft);
+      border: 1px solid var(--line-soft);
+    }
+
+    .info-box label {
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    .card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 14px;
+      padding-top: 13px;
+      border-top: 1px solid var(--line-soft);
+    }
+
+    .views {
+      color: var(--text-placeholder);
+      font-size: 11px;
+      white-space: nowrap;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    .btn,
+    .btn-small,
+    .state-btn {
+      min-height: 40px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 0 15px;
+      border-radius: 18px;
+      color: var(--primary-color);
+      background: var(--surface-tint);
+      border: 1px solid rgba(53, 106, 223, 0.10);
+      font-size: 13px;
+      font-weight: 800;
+      text-align: center;
+    }
+
+    .btn-small {
+      min-height: 34px;
+      padding: 0 12px;
+      border-radius: 999px;
+      font-size: 12px;
+    }
+
+    .btn.primary,
+    .btn-small.primary,
+    .state-btn {
+      color: #ffffff;
+      background: var(--primary-color);
+      border-color: var(--primary-color);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .btn.success,
+    .btn-small.success {
+      color: #ffffff;
+      background: var(--success-color);
+      border-color: var(--success-color);
+    }
+
+    .btn.warning,
+    .btn-small.warning {
+      color: #ffffff;
+      background: var(--warning-color);
+      border-color: var(--warning-color);
+    }
+
+    .btn.danger,
+    .btn-small.danger {
+      color: #ffffff;
+      background: var(--error-color);
+      border-color: var(--error-color);
+    }
+
+    .btn.ghost,
+    .btn-small.ghost {
+      color: var(--primary-color);
+      background: rgba(255, 255, 255, 0.72);
+      border-color: rgba(53, 106, 223, 0.16);
+    }
+
+    .phone.dark .btn.ghost,
+    .phone.dark .btn-small.ghost {
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .form-grid {
+      display: grid;
+      gap: 14px;
+    }
+
+    .field label,
+    .form-label {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--text-color);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .required {
+      color: var(--error-color);
+      margin-right: 4px;
+    }
+
+    input,
+    textarea,
+    select {
+      width: 100%;
+      min-height: 48px;
+      border: 1px solid var(--line-soft);
+      border-radius: 20px;
+      outline: none;
+      color: var(--text-color);
+      background: var(--surface-soft);
+      padding: 0 14px;
+      font-size: 14px;
+      font-weight: 650;
+      box-shadow: none;
+    }
+
+    textarea {
+      min-height: 118px;
+      padding-top: 13px;
+      resize: vertical;
+      line-height: 1.6;
+    }
+
+    input:focus,
+    textarea:focus,
+    select:focus {
+      border-color: rgba(53, 106, 223, 0.42);
+      box-shadow: 0 0 0 3px rgba(53, 106, 223, 0.08);
+    }
+
+    .type-selector {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .type-option {
+      min-height: 112px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 16px 12px;
+      border-radius: 22px;
+      background: var(--card-bg);
+      border: 1px solid var(--line-soft);
+      box-shadow: var(--shadow);
+      color: var(--text-color);
+    }
+
+    .type-option.active {
+      color: #fff;
+      background: var(--primary-color);
+      border-color: var(--primary-color);
+    }
+
+    .type-icon {
+      width: 46px;
+      height: 46px;
+      display: grid;
+      place-items: center;
+      margin-bottom: 8px;
+      border-radius: 16px;
+      color: var(--primary-color);
+      background: rgba(53, 106, 223, 0.08);
+      font-size: 21px;
+      font-weight: 900;
+    }
+
+    .type-option.active .type-icon {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .type-title {
+      font-size: 14px;
+      font-weight: 850;
+    }
+
+    .type-note {
+      margin-top: 3px;
+      color: var(--text-placeholder);
+      font-size: 11px;
+      line-height: 1.45;
+      text-align: center;
+    }
+
+    .type-option.active .type-note {
+      color: rgba(255, 255, 255, 0.82);
+    }
+
+    .upload-box {
+      min-height: 88px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      border-radius: 20px;
+      color: var(--text-placeholder);
+      background: var(--surface-soft);
+      border: 1.5px dashed var(--border-color);
+      font-size: 12px;
+      font-weight: 750;
+      text-align: center;
+      cursor: pointer;
+    }
+
+    .upload-box strong {
+      color: var(--primary-color);
+      font-size: 24px;
+      line-height: 1;
+    }
+
+    .file-name {
+      color: var(--primary-color);
+      font-size: 11px;
+      font-weight: 750;
+      word-break: break-word;
+    }
+
+    .bottom-action {
+      position: sticky;
+      bottom: -96px;
+      margin: 16px -14px -96px;
+      padding: 10px 14px 12px;
+      background: rgba(255, 255, 255, 0.94);
+      border-top: 1px solid var(--line-soft);
+      box-shadow: 0 -12px 36px rgba(31, 41, 80, 0.08);
+    }
+
+    .phone.dark .bottom-action {
+      background: rgba(16, 25, 46, 0.94);
+    }
+
+    .bottom-action .btn {
+      width: 100%;
+    }
+
+    .hero-profile {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      align-items: center;
+    }
+
+    .avatar {
+      width: 66px;
+      height: 66px;
+      border-radius: 22px;
+      object-fit: cover;
+      border: 4px solid rgba(255, 255, 255, 0.22);
+      background: rgba(255, 255, 255, 0.18);
+      box-shadow: 0 16px 34px rgba(16, 58, 150, 0.14);
+    }
+
+    .menu-section {
+      display: grid;
+      gap: 10px;
+    }
+
+    .menu-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-height: 74px;
+      padding: 13px;
+      border-radius: 18px;
+      color: var(--text-color);
+      background: var(--surface-soft);
+      border: 1px solid var(--line-soft);
+      text-align: left;
+    }
+
+    .menu-icon {
+      flex: 0 0 42px;
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      border-radius: 15px;
+      color: var(--primary-color);
+      background: rgba(93, 141, 255, 0.12);
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .menu-icon.gold {
+      color: #b86a34;
+      background: rgba(255, 175, 124, 0.16);
+    }
+
+    .menu-icon.rose {
+      color: var(--error-color);
+      background: rgba(255, 110, 127, 0.14);
+    }
+
+    .menu-icon.slate {
+      color: #5d6a87;
+      background: rgba(93, 106, 135, 0.12);
+    }
+
+    .menu-meta {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .menu-text {
+      color: var(--text-color);
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .menu-desc {
+      margin-top: 3px;
+      color: var(--text-placeholder);
+      font-size: 11px;
+      line-height: 1.5;
+      word-break: break-word;
+    }
+
+    .menu-arrow {
+      color: var(--text-placeholder);
+      font-size: 22px;
+    }
+
+    .state-panel {
+      padding: 38px 22px;
+      text-align: center;
+      border-style: dashed;
+    }
+
+    .state-title {
+      color: var(--text-color);
+      font-size: 17px;
+      font-weight: 850;
+    }
+
+    .state-desc {
+      margin: 8px 0 0;
+      color: var(--text-secondary);
+      font-size: 12px;
+      line-height: 1.7;
+    }
+
+    .state-actions {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 16px;
+      flex-wrap: wrap;
+    }
+
+    .claim-card {
+      display: grid;
+      gap: 12px;
+    }
+
+    .claim-message {
+      padding: 13px;
+      border-radius: 16px;
+      color: var(--text-color);
+      background: var(--surface-soft);
+      border: 1px solid var(--line-soft);
+      font-size: 12px;
+      line-height: 1.7;
+    }
+
+    .rule-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .rule-item {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      padding: 13px;
+      border-radius: 17px;
+      background: var(--surface-soft);
+      border: 1px solid var(--line-soft);
+    }
+
+    .rule-copy {
+      min-width: 0;
+      flex: 1;
+      color: var(--text-secondary);
+      font-size: 12px;
+      line-height: 1.65;
+    }
+
+    .chart-list {
+      display: grid;
+      gap: 13px;
+    }
+
+    .bar-row {
+      display: grid;
+      grid-template-columns: 72px 1fr 34px;
+      gap: 10px;
+      align-items: center;
+      color: var(--text-secondary);
+      font-size: 12px;
+    }
+
+    .bar-track {
+      height: 12px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: var(--surface-soft);
+      border: 1px solid var(--line-soft);
+    }
+
+    .bar-fill {
+      height: 100%;
+      width: var(--bar, 0%);
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--primary-light), var(--primary-color));
+    }
+
+    .rank-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .rank-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      border-radius: 16px;
+      background: var(--surface-soft);
+      border: 1px solid var(--line-soft);
+    }
+
+    .rank-num {
+      width: 28px;
+      height: 28px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      color: #fff;
+      background: var(--primary-color);
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .rank-name {
+      flex: 1;
+      color: var(--text-color);
+      font-weight: 750;
+    }
+
+    .rank-count {
+      color: var(--text-secondary);
+      font-size: 12px;
+    }
+
+    .trend-chart {
+      height: 194px;
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      align-items: end;
+      gap: 9px;
+      padding: 10px 2px 0;
+    }
+
+    .trend-item {
+      display: grid;
+      gap: 6px;
+      justify-items: center;
+      color: var(--text-placeholder);
+      font-size: 10px;
+    }
+
+    .trend-bars {
+      height: 116px;
+      display: flex;
+      align-items: flex-end;
+      gap: 3px;
+    }
+
+    .trend-bar {
+      width: 8px;
+      min-height: 4px;
+      border-radius: 5px 5px 0 0;
+    }
+
+    .trend-bar.lost {
+      background: var(--warning-color);
+    }
+
+    .trend-bar.found {
+      background: var(--info-color);
+    }
+
+    .modal,
+    .tools {
+      position: fixed;
+      inset: 0;
+      z-index: 40;
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+      padding: 18px;
+      background: rgba(15, 23, 42, 0.34);
+      backdrop-filter: blur(8px);
+    }
+
+    .modal.show,
+    .tools.show {
+      display: flex;
+    }
+
+    .sheet-card,
+    .modal-card {
+      width: min(388px, 100%);
+      padding: 20px;
+      background: var(--card-bg);
+      color: var(--text-color);
+    }
+
+    .sheet-card h2,
+    .modal-card h2 {
+      margin: 0 0 8px;
+      font-size: 20px;
+      line-height: 1.3;
+    }
+
+    .sheet-card p,
+    .modal-card p {
+      margin: 0 0 14px;
+      color: var(--text-secondary);
+      font-size: 12px;
+      line-height: 1.72;
+    }
+
+    .tool-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    @media (max-height: 760px) {
+      .phone {
+        min-height: calc(100vh - 24px);
+      }
+
+      .content {
+        padding-bottom: 96px;
+      }
+    }
+
+    @media (max-width: 430px) {
+      .stage {
+        padding: 0;
+      }
+
+      .phone {
+        width: 100vw;
+        height: 100vh;
+        min-height: 100vh;
+        border: 0;
+        border-radius: 0;
+      }
+
+      .modal,
+      .tools {
+        padding: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="stage">
+    <section class="phone" id="phone">
+      <div class="statusbar">
+        <span>9:35</span>
+        <span class="status-icons"><span>5G</span><span class="battery"></span></span>
+      </div>
+      <header class="navtop">
+        <button class="icon-btn" id="backBtn" type="button" aria-label="返回">‹</button>
+        <div class="nav-title" id="title">校园失物招领</div>
+        <button class="role-btn" id="toolsBtn" type="button" aria-label="演示控制">
+          <span class="role-dot"></span><span id="roleText">演示</span>
+        </button>
+      </header>
+      <div class="toast" id="toast"></div>
+      <section class="content" id="app"></section>
+      <nav class="tabbar" id="tabbar"></nav>
+    </section>
+  </main>
+
+  <section class="tools" id="tools">
+    <div class="sheet-card">
+      <h2>演示控制</h2>
+      <p>当前页面使用本地数据模拟小程序端到端流程，切换身份后可以完成发布、审核、认领和统计更新。</p>
+      <div class="tool-grid">
+        <button class="btn primary" type="button" data-action="setAccount" data-account="user">普通用户</button>
+        <button class="btn warning" type="button" data-action="setAccount" data-account="admin">管理员</button>
+        <button class="btn ghost" type="button" data-action="setAccount" data-account="">访客</button>
+        <button class="btn ghost" type="button" data-action="resetData">重置数据</button>
+        <button class="btn ghost" type="button" data-action="toggleTheme">切换主题</button>
+        <button class="btn ghost" type="button" data-action="closeTools">关闭</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="modal" id="modal">
+    <div class="modal-card">
+      <h2 id="modalTitle"></h2>
+      <div id="modalBody"></div>
+      <button class="btn primary" type="button" data-action="closeModal">知道了</button>
+    </div>
+  </section>
+
+  <script>
+    const STORAGE_KEY = 'campus-lost-found-ui-demo-v1'
+    const DATA_VERSION = '2026-04-24-complete-loop'
+
+    const categoryOptions = [
+      { key: 'idcard', label: '证件' },
+      { key: 'electronics', label: '电子产品' },
+      { key: 'books', label: '书籍' },
+      { key: 'clothes', label: '衣物' },
+      { key: 'keys', label: '钥匙' },
+      { key: 'others', label: '其他' }
+    ]
+
+    const seed = {
+      records: [
+        {
+          id: 'r1001',
+          owner: 'me',
+          type: 'lost',
+          itemName: '校园卡',
+          category: 'idcard',
+          location: '教学楼 A 栋 201',
+          eventTime: '2026-04-22',
+          description: '蓝色卡套，卡背面贴了本周课程表。',
+          contactInfo: '微信：card_demo',
+          images: [],
+          imageName: '',
+          auditStatus: 'approved',
+          status: 'searching',
+          viewCount: 18,
+          createTime: '2026-04-22 13:20'
+        },
+        {
+          id: 'r1002',
+          owner: 'other',
+          type: 'found',
+          itemName: 'AirPods 保护壳',
+          category: 'electronics',
+          location: '体育馆看台',
+          eventTime: '2026-04-21',
+          description: '透明外壳，侧边有一枚圆形贴纸。',
+          contactInfo: '手机号：13800000000',
+          images: [],
+          imageName: '',
+          auditStatus: 'approved',
+          status: 'pending',
+          viewCount: 34,
+          createTime: '2026-04-21 18:40'
+        },
+        {
+          id: 'r1003',
+          owner: 'me',
+          type: 'found',
+          itemName: '高数教材',
+          category: 'books',
+          location: '图书馆三楼自习区',
+          eventTime: '2026-04-20',
+          description: '封面有姓名缩写，夹着一张蓝色便签。',
+          contactInfo: '微信：book_demo',
+          images: [],
+          imageName: '',
+          auditStatus: 'approved',
+          status: 'pending',
+          viewCount: 11,
+          createTime: '2026-04-20 20:10'
+        },
+        {
+          id: 'r1004',
+          owner: 'me',
+          type: 'lost',
+          itemName: '白色手机',
+          category: 'electronics',
+          location: '操场西侧看台',
+          eventTime: '2026-04-23',
+          description: '白色保护壳，背面有校园贴纸。',
+          contactInfo: '微信：phone_demo',
+          images: [],
+          imageName: '',
+          auditStatus: 'pending',
+          status: 'searching',
+          viewCount: 0,
+          createTime: '2026-04-23 16:35'
+        },
+        {
+          id: 'r1005',
+          owner: 'me',
+          type: 'lost',
+          itemName: '黑色折叠伞',
+          category: 'others',
+          location: '食堂二楼',
+          eventTime: '2026-04-18',
+          description: '伞柄有磨损，伞袋上有白色字母。',
+          contactInfo: '手机号：13900000000',
+          images: [],
+          imageName: '',
+          auditStatus: 'approved',
+          status: 'found',
+          viewCount: 22,
+          createTime: '2026-04-18 12:08'
+        },
+        {
+          id: 'r1006',
+          owner: 'other',
+          type: 'found',
+          itemName: '蓝牙鼠标',
+          category: 'electronics',
+          location: '实验楼 302',
+          eventTime: '2026-04-19',
+          description: '黑色无线鼠标，底部有磨损痕迹。',
+          contactInfo: '微信：mouse_demo',
+          images: [],
+          imageName: '',
+          auditStatus: 'approved',
+          status: 'pending',
+          viewCount: 16,
+          createTime: '2026-04-19 09:48'
+        },
+        {
+          id: 'r1007',
+          owner: 'me',
+          type: 'found',
+          itemName: '保温杯',
+          category: 'others',
+          location: '宿舍楼 5 栋大厅',
+          eventTime: '2026-04-17',
+          description: '银色杯身，但描述过于简单，等待补充。',
+          contactInfo: '微信：cup_demo',
+          images: [],
+          imageName: '',
+          auditStatus: 'rejected',
+          status: 'pending',
+          viewCount: 0,
+          createTime: '2026-04-17 21:12'
+        },
+        {
+          id: 'r1008',
+          owner: 'other',
+          type: 'lost',
+          itemName: '宿舍钥匙',
+          category: 'keys',
+          location: '快递站门口',
+          eventTime: '2026-04-22',
+          description: '两把钥匙和一个蓝色门禁扣。',
+          contactInfo: '微信：key_demo',
+          images: [],
+          imageName: '',
+          auditStatus: 'approved',
+          status: 'searching',
+          viewCount: 27,
+          createTime: '2026-04-22 10:05'
+        }
+      ],
+      claims: [
+        {
+          id: 'c2001',
+          itemId: 'r1002',
+          applicant: 'me',
+          message: '耳机壳侧边贴纸和我的一致，可以提供购买记录截图。',
+          imageName: '',
+          status: 'pending',
+          createTime: '2026-04-22 10:30'
+        },
+        {
+          id: 'c2002',
+          itemId: 'r1003',
+          applicant: 'other',
+          message: '教材第一页写了我的姓名缩写，可以当面说明。',
+          imageName: '',
+          status: 'pending',
+          createTime: '2026-04-22 10:40'
+        },
+        {
+          id: 'c2003',
+          itemId: 'r1006',
+          applicant: 'me',
+          message: '鼠标底部序列号后四位和我的记录一致。',
+          imageName: '',
+          status: 'approved',
+          createTime: '2026-04-20 15:16'
+        }
+      ]
+    }
+
+    const state = {
+      page: 'home',
+      history: [],
+      account: 'user',
+      theme: 'light',
+      toolsOpen: false,
+      modalOpen: false,
+      modalTitle: '',
+      modalBody: '',
+      homeType: 'all',
+      homeCategory: '',
+      searchKeyword: '',
+      searchType: 'all',
+      searchCategory: '',
+      searchStatus: 'displaying',
+      publishType: 'lost',
+      postsType: 'all',
+      postsStatus: 'all',
+      claimTab: 'my',
+      adminSection: 'pending',
+      selectedId: 'r1002',
+      editId: 'r1001',
+      claimId: 'r1002',
+      records: [],
+      claims: []
+    }
+
+    const titles = {
+      home: '校园失物招领',
+      search: '搜索',
+      publish: '发布信息',
+      detail: '信息详情',
+      claim: '提交认领',
+      my: '我的',
+      posts: '我的发布',
+      edit: '编辑信息',
+      claims: '认领申请',
+      admin: '管理后台',
+      stats: '数据统计',
+      privacy: '数据与隐私'
+    }
+
+    const typeText = { lost: '失物', found: '招领' }
+    const auditText = { pending: '待审核', approved: '已通过', rejected: '需修改' }
+    const claimText = { pending: '待处理', approved: '已同意', rejected: '已拒绝' }
+
+    function clone(data) {
+      return JSON.parse(JSON.stringify(data))
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;')
+    }
+
+    function uid(prefix) {
+      return `${prefix}${Date.now().toString(36)}${Math.random().toString(36).slice(2, 7)}`
+    }
+
+    function today() {
+      return '2026-04-24'
+    }
+
+    function nowText() {
+      return '2026-04-24 09:35'
+    }
+
+    function saveData() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        version: DATA_VERSION,
+        account: state.account,
+        theme: state.theme,
+        records: state.records,
+        claims: state.claims
+      }))
+    }
+
+    function loadData() {
+      const saved = localStorage.getItem(STORAGE_KEY)
+      if (saved) {
+        try {
+          const data = JSON.parse(saved)
+          if (data.version === DATA_VERSION && Array.isArray(data.records) && Array.isArray(data.claims)) {
+            state.records = data.records
+            state.claims = data.claims
+            state.account = data.account ?? 'user'
+            state.theme = data.theme === 'dark' ? 'dark' : 'light'
+            return
+          }
+        } catch (error) {
+          localStorage.removeItem(STORAGE_KEY)
+        }
+      }
+
+      state.records = clone(seed.records)
+      state.claims = clone(seed.claims)
+      state.account = 'user'
+      state.theme = 'light'
+      saveData()
+    }
+
+    function resetData() {
+      state.records = clone(seed.records)
+      state.claims = clone(seed.claims)
+      state.homeType = 'all'
+      state.homeCategory = ''
+      state.searchKeyword = ''
+      state.searchType = 'all'
+      state.searchCategory = ''
+      state.searchStatus = 'displaying'
+      state.postsType = 'all'
+      state.postsStatus = 'all'
+      state.claimTab = 'my'
+      state.adminSection = 'pending'
+      saveData()
+      toast('演示数据已重置')
+      render()
+    }
+
+    function categoryLabel(key) {
+      return (categoryOptions.find(item => item.key === key) || {}).label || '其他'
+    }
+
+    function accountLabel() {
+      if (state.account === 'admin') return '管理员'
+      if (state.account === 'user') return '普通用户'
+      return '访客'
+    }
+
+    function isLoggedIn() {
+      return !!state.account
+    }
+
+    function isAdmin() {
+      return state.account === 'admin'
+    }
+
+    function isOwner(record) {
+      return !!record && record.owner === 'me' && state.account !== ''
+    }
+
+    function byId(id) {
+      return state.records.find(record => record.id === id)
+    }
+
+    function claimsForRecord(recordId) {
+      return state.claims.filter(claim => claim.itemId === recordId)
+    }
+
+    function approvedClaimByMe(recordId) {
+      return state.claims.some(claim => claim.itemId === recordId && claim.applicant === 'me' && claim.status === 'approved')
+    }
+
+    function existingClaimByMe(recordId) {
+      return state.claims.find(claim => claim.itemId === recordId && claim.applicant === 'me' && claim.status !== 'rejected')
+    }
+
+    function canCopyContact(record) {
+      if (!record) return false
+      if (isOwner(record) || isAdmin()) return !!record.contactInfo
+      if (record.type === 'lost' && record.auditStatus === 'approved' && record.status === 'searching') return !!record.contactInfo
+      if (record.type === 'found' && approvedClaimByMe(record.id)) return !!record.contactInfo
+      return false
+    }
+
+    function canClaim(record) {
+      return state.account === 'user' &&
+        record &&
+        !isOwner(record) &&
+        record.type === 'found' &&
+        record.auditStatus === 'approved' &&
+        record.status === 'pending' &&
+        !existingClaimByMe(record.id)
+    }
+
+    function statusText(record) {
+      if (record.type === 'lost') {
+        return record.status === 'found' ? '已找回' : '寻找中'
+      }
+      return record.status === 'claimed' ? '已认领' : '待认领'
+    }
+
+    function statusTone(record) {
+      if (record.status === 'found' || record.status === 'claimed') return 'green'
+      return record.type === 'lost' ? 'orange' : 'blue'
+    }
+
+    function auditTone(status) {
+      if (status === 'approved') return 'green'
+      if (status === 'rejected') return 'red'
+      return 'orange'
+    }
+
+    function publicRecords(includeCompleted = false) {
+      return state.records.filter(record => {
+        if (record.auditStatus !== 'approved') return false
+        if (includeCompleted) return true
+        return (record.type === 'lost' && record.status === 'searching') ||
+          (record.type === 'found' && record.status === 'pending')
+      }).sort((a, b) => b.createTime.localeCompare(a.createTime))
+    }
+
+    function filteredHomeRecords() {
+      return publicRecords(false).filter(record => {
+        if (state.homeType !== 'all' && record.type !== state.homeType) return false
+        if (state.homeCategory && record.category !== state.homeCategory) return false
+        return true
+      })
+    }
+
+    function filteredSearchRecords() {
+      const keyword = state.searchKeyword.trim().toLowerCase()
+      return publicRecords(true).filter(record => {
+        if (state.searchType !== 'all' && record.type !== state.searchType) return false
+        if (state.searchCategory && record.category !== state.searchCategory) return false
+        if (state.searchStatus === 'displaying') {
+          const open = (record.type === 'lost' && record.status === 'searching') ||
+            (record.type === 'found' && record.status === 'pending')
+          if (!open) return false
+        }
+        if (state.searchStatus === 'completed' && record.status !== 'found' && record.status !== 'claimed') return false
+        if (!keyword) return true
+        return `${record.itemName}${record.description}${record.location}${categoryLabel(record.category)}`.toLowerCase().includes(keyword)
+      }).sort((a, b) => b.createTime.localeCompare(a.createTime))
+    }
+
+    function myRecords() {
+      return state.records.filter(record => record.owner === 'me')
+    }
+
+    function filteredMyRecords() {
+      return myRecords().filter(record => {
+        if (state.postsType !== 'all' && record.type !== state.postsType) return false
+        if (state.postsStatus === 'pendingAudit') return record.auditStatus === 'pending'
+        if (state.postsStatus === 'displaying') {
+          return record.auditStatus === 'approved' &&
+            ((record.type === 'lost' && record.status === 'searching') ||
+            (record.type === 'found' && record.status === 'pending'))
+        }
+        if (state.postsStatus === 'completed') return record.status === 'found' || record.status === 'claimed'
+        if (state.postsStatus === 'rejected') return record.auditStatus === 'rejected'
+        return true
+      }).sort((a, b) => b.createTime.localeCompare(a.createTime))
+    }
+
+    function overview() {
+      const totalLost = state.records.filter(record => record.type === 'lost').length
+      const totalFound = state.records.filter(record => record.type === 'found').length
+      const recovered = state.records.filter(record => record.status === 'found' || record.status === 'claimed').length
+      const total = totalLost + totalFound
+      return {
+        totalLost,
+        totalFound,
+        recovered,
+        recoveryRate: total ? Math.round(recovered / total * 100) : 0,
+        pendingAudit: state.records.filter(record => record.auditStatus === 'pending').length,
+        totalPosts: total
+      }
+    }
+
+    function toast(message) {
+      const el = document.getElementById('toast')
+      el.textContent = message
+      el.classList.add('show')
+      window.clearTimeout(toast.timer)
+      toast.timer = window.setTimeout(() => el.classList.remove('show'), 2200)
+    }
+
+    function openModal(title, body) {
+      state.modalTitle = title
+      state.modalBody = body
+      state.modalOpen = true
+      renderModal()
+    }
+
+    function closeModal() {
+      state.modalOpen = false
+      renderModal()
+    }
+
+    function renderModal() {
+      document.getElementById('modalTitle').textContent = state.modalTitle
+      document.getElementById('modalBody').innerHTML = state.modalBody
+      document.getElementById('modal').classList.toggle('show', state.modalOpen)
+    }
+
+    function navigate(page, params = {}, pushHistory = true) {
+      if (page === 'admin' && !isAdmin()) {
+        toast('仅管理员可访问')
+        page = 'my'
+      }
+      if ((page === 'posts' || page === 'claims') && !isLoggedIn()) {
+        toast('请先登录')
+        page = 'my'
+      }
+      if (page === 'detail' && params.id) state.selectedId = params.id
+      if (page === 'edit' && params.id) state.editId = params.id
+      if (page === 'claim' && params.id) state.claimId = params.id
+      if (params.postsType !== undefined) state.postsType = params.postsType
+      if (params.postsStatus !== undefined) state.postsStatus = params.postsStatus
+      if (params.claimTab !== undefined) state.claimTab = params.claimTab
+      if (params.adminSection !== undefined) state.adminSection = params.adminSection
+      if (pushHistory && state.page !== page) state.history.push(state.page)
+      state.page = page
+      state.toolsOpen = false
+      render()
+      document.getElementById('app').scrollTop = 0
+    }
+
+    function back() {
+      const previous = state.history.pop()
+      if (previous) {
+        state.page = previous
+      } else {
+        state.page = 'home'
+      }
+      render()
+      document.getElementById('app').scrollTop = 0
+    }
+
+    function tag(text, tone = 'gray') {
+      return `<span class="tag tag-${tone}">${escapeHtml(text)}</span>`
+    }
+
+    function categoryChips(active, actionName) {
+      return `
+        <div class="chip-row">
+          <button class="filter-chip ${active === '' ? 'active' : ''}" type="button" data-action="${actionName}" data-category="">全部</button>
+          ${categoryOptions.map(item => `
+            <button class="filter-chip ${active === item.key ? 'active' : ''}" type="button" data-action="${actionName}" data-category="${item.key}">${item.label}</button>
+          `).join('')}
+        </div>
+      `
+    }
+
+    function pageHero(kicker, title, desc, alt = true) {
+      return `
+        <section class="hero ${alt ? 'alt' : ''}">
+          <div class="hero-kicker">${escapeHtml(kicker)}</div>
+          <h1>${escapeHtml(title)}</h1>
+          <p>${escapeHtml(desc)}</p>
+        </section>
+      `
+    }
+
+    function renderRecordCard(record, context = 'home') {
+      const mine = isOwner(record)
+      const actions = []
+      const typeTone = record.type === 'lost' ? 'orange' : 'blue'
+      const contactVisible = canCopyContact(record)
+      const sourceClass = mine ? '' : 'other'
+      const sourceText = mine ? '我的发布' : '他人发布'
+      const openStatus = (record.type === 'lost' && record.status === 'searching') ||
+        (record.type === 'found' && record.status === 'pending')
+
+      if (context !== 'detail') {
+        actions.push(`<button class="btn-small primary" type="button" data-action="detail" data-id="${record.id}">详情</button>`)
+      }
+
+      if ((context === 'home' || context === 'search') && canClaim(record)) {
+        actions.push(`<button class="btn-small ghost" type="button" data-action="claimStart" data-id="${record.id}">申请认领</button>`)
+      }
+
+      if ((context === 'home' || context === 'search' || context === 'detail') && contactVisible && !mine && record.type === 'lost') {
+        actions.push(`<button class="btn-small ghost" type="button" data-action="copyContact" data-id="${record.id}">联系失主</button>`)
+      }
+
+      if (context === 'posts' || (context === 'detail' && mine)) {
+        actions.push(`<button class="btn-small ghost" type="button" data-action="editStart" data-id="${record.id}">编辑</button>`)
+        if (record.auditStatus === 'approved' && openStatus) {
+          actions.push(`<button class="btn-small success" type="button" data-action="completeRecord" data-id="${record.id}">${record.type === 'lost' ? '已找回' : '已认领'}</button>`)
+        }
+        actions.push(`<button class="btn-small danger" type="button" data-action="deleteRecord" data-id="${record.id}">删除</button>`)
+      }
+
+      if (context === 'adminPending') {
+        actions.push(`<button class="btn-small ghost" type="button" data-action="detail" data-id="${record.id}">详情</button>`)
+        actions.push(`<button class="btn-small danger" type="button" data-action="rejectRecord" data-id="${record.id}">拒绝</button>`)
+        actions.push(`<button class="btn-small success" type="button" data-action="approveRecord" data-id="${record.id}">通过</button>`)
+      }
+
+      if (context === 'adminAll') {
+        actions.push(`<button class="btn-small ghost" type="button" data-action="detail" data-id="${record.id}">详情</button>`)
+        actions.push(`<button class="btn-small danger" type="button" data-action="deleteRecord" data-id="${record.id}">删除</button>`)
+      }
+
+      return `
+        <article class="item-card ${mine ? 'item-mine' : ''}">
+          <div class="item-source ${sourceClass}">${sourceText}</div>
+          <div class="item-main">
+            <div class="thumb ${record.type}">${escapeHtml(record.itemName.slice(0, 1))}</div>
+            <div>
+              <div class="item-title-row">
+                <div class="item-title">${escapeHtml(record.itemName)}</div>
+                <div class="item-time">${escapeHtml(record.createTime.slice(5, 10))}</div>
+              </div>
+              <p class="item-desc">${escapeHtml(record.description || '暂无补充描述')}</p>
+              <div class="tag-line">
+                ${tag(typeText[record.type], typeTone)}
+                ${tag(statusText(record), statusTone(record))}
+                ${tag(auditText[record.auditStatus], auditTone(record.auditStatus))}
+              </div>
+              <div class="info-list">
+                <div class="info-line"><label>分类</label><div>${categoryLabel(record.category)}</div></div>
+                <div class="info-line"><label>地点</label><div>${escapeHtml(record.location)}</div></div>
+                <div class="info-line"><label>时间</label><div>${escapeHtml(record.eventTime)}</div></div>
+              </div>
+            </div>
+          </div>
+          ${record.imageName ? `<div class="file-name">图片：${escapeHtml(record.imageName)}</div>` : ''}
+          <div class="card-footer">
+            <div class="views">浏览 ${record.viewCount || 0}</div>
+            <div class="actions">${actions.join('')}</div>
+          </div>
+        </article>
+      `
+    }
+
+    function renderHome() {
+      const data = overview()
+      const records = filteredHomeRecords()
+      return `
+        <section class="hero">
+          <div class="hero-kicker">校园失物招领</div>
+          <h1>先搜再发，快速找回</h1>
+          <p>按物品、地点和分类定位线索，减少重复发布和无效联系。</p>
+          <button class="hero-search" type="button" data-action="nav" data-page="search">
+            <span class="search-symbol"></span>
+            <span>搜索物品、地点、描述</span>
+          </button>
+        </section>
+
+        <section class="panel">
+          <div class="section-head">
+            <h2 class="section-title">平台概览</h2>
+            <div class="section-subtitle">${state.homeType === 'all' ? '全部动态' : typeText[state.homeType]} · ${state.homeCategory ? categoryLabel(state.homeCategory) : '全部分类'}</div>
+          </div>
+          <div class="summary-grid">
+            <div class="summary-item"><div class="summary-value">${data.totalLost}</div><div class="summary-label">失物发布</div></div>
+            <div class="summary-item"><div class="summary-value">${data.totalFound}</div><div class="summary-label">招领发布</div></div>
+            <div class="summary-item"><div class="summary-value">${data.recovered}</div><div class="summary-label">已完成</div></div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="tabs">
+            ${['all', 'lost', 'found'].map(key => `<button class="${state.homeType === key ? 'active' : ''}" type="button" data-action="homeType" data-type="${key}">${key === 'all' ? '全部' : typeText[key]}</button>`).join('')}
+          </div>
+          <div style="height:12px"></div>
+          ${categoryChips(state.homeCategory, 'homeCategory')}
+        </section>
+
+        <section class="list">
+          ${records.length ? records.map(record => renderRecordCard(record, 'home')).join('') : renderEmpty('暂无相关信息', '你可以先发布失物或招领信息，帮助更多同学更快找回物品。', [
+            ['发布失物', 'publishPreset', 'lost'],
+            ['发布招领', 'publishPreset', 'found']
+          ])}
+        </section>
+      `
+    }
+
+    function renderSearch() {
+      const records = filteredSearchRecords()
+      return `
+        ${pageHero('检索中心', '快速定位失物和招领', '输入物品、地点或描述，再按类型、分类和状态缩小范围。')}
+        <section class="panel">
+          <form class="form-grid" id="searchForm">
+            <div class="field">
+              <label>关键词</label>
+              <input name="keyword" value="${escapeHtml(state.searchKeyword)}" placeholder="搜索物品名称、地点或描述" />
+            </div>
+            <button class="btn primary" type="submit">查找</button>
+          </form>
+        </section>
+
+        <section class="panel">
+          <div class="section-head">
+            <h2 class="section-title">筛选条件</h2>
+            <button class="btn-small ghost" type="button" data-action="resetSearch">重置</button>
+          </div>
+          <div class="form-grid">
+            <div>
+              <div class="form-label">类型</div>
+              <div class="segmented">
+                ${['all', 'lost', 'found'].map(key => `<button class="${state.searchType === key ? 'active' : ''}" type="button" data-action="searchType" data-type="${key}">${key === 'all' ? '全部' : typeText[key]}</button>`).join('')}
+              </div>
+            </div>
+            <div>
+              <div class="form-label">分类</div>
+              ${categoryChips(state.searchCategory, 'searchCategory')}
+            </div>
+            <div>
+              <div class="form-label">状态</div>
+              <div class="segmented">
+                ${[
+                  ['displaying', '展示中'],
+                  ['all', '全部'],
+                  ['completed', '已完成']
+                ].map(([key, label]) => `<button class="${state.searchStatus === key ? 'active' : ''}" type="button" data-action="searchStatus" data-status="${key}">${label}</button>`).join('')}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel" style="padding-bottom:6px">
+          <div class="section-head">
+            <h2 class="section-title">搜索结果</h2>
+            <div class="section-subtitle">${records.length} 条</div>
+          </div>
+        </section>
+        <section class="list">
+          ${records.length ? records.map(record => renderRecordCard(record, 'search')).join('') : renderEmpty('未找到相关信息', '试试更换关键词或重置筛选条件。')}
+        </section>
+      `
+    }
+
+    function renderPublish() {
+      const title = state.publishType === 'lost' ? '登记失物线索' : '登记招领信息'
+      const desc = state.publishType === 'lost' ? '写清物品、地点、时间和特征，方便同学快速比对。' : '记录拾取地点、外观和联系方式，认领通过后再开放联系。'
+      return `
+        <section class="hero">
+          <div class="hero-kicker">信息登记</div>
+          <h1>${title}</h1>
+          <p>${desc}</p>
+        </section>
+        ${!isLoggedIn() ? renderLoginNudge() : ''}
+        <div class="type-selector">
+          <button class="type-option ${state.publishType === 'lost' ? 'active' : ''}" type="button" data-action="publishSwitch" data-type="lost">
+            <span class="type-icon">寻</span>
+            <span class="type-title">我丢了东西</span>
+            <span class="type-note">发布寻物线索</span>
+          </button>
+          <button class="type-option ${state.publishType === 'found' ? 'active' : ''}" type="button" data-action="publishSwitch" data-type="found">
+            <span class="type-icon">领</span>
+            <span class="type-title">我捡到东西</span>
+            <span class="type-note">等待失主认领</span>
+          </button>
+        </div>
+        <section class="panel">
+          <form class="form-grid" id="publishForm">
+            <div class="field"><label><span class="required">*</span>物品名称</label><input name="itemName" required placeholder="请输入物品名称" /></div>
+            <div class="field"><label><span class="required">*</span>物品分类</label>${categorySelect('category', 'idcard')}</div>
+            <div class="field"><label><span class="required">*</span>${state.publishType === 'lost' ? '丢失地点' : '拾取地点'}</label><input name="location" required placeholder="请输入地点" /></div>
+            <div class="field"><label><span class="required">*</span>${state.publishType === 'lost' ? '丢失时间' : '拾取时间'}</label><input name="eventTime" type="date" required value="${today()}" /></div>
+            <div class="field"><label>物品描述</label><textarea name="description" maxlength="500" placeholder="请详细描述物品特征，便于识别"></textarea></div>
+            <div class="field"><label><span class="required">*</span>联系方式</label><input name="contactInfo" required placeholder="手机号 / 微信号" /></div>
+            ${uploadBox('image')}
+            <button class="btn primary" type="submit">发布信息</button>
+          </form>
+        </section>
+      `
+    }
+
+    function renderDetail() {
+      const record = byId(state.selectedId)
+      if (!record) return renderEmpty('信息不存在', '这条记录可能已被删除。')
+      const contactVisible = canCopyContact(record)
+      const contactText = contactVisible ? record.contactInfo : (record.type === 'found' ? '认领通过后可见' : '当前状态不展示')
+      const relatedClaims = claimsForRecord(record.id)
+      const receivedPending = relatedClaims.filter(claim => claim.status === 'pending').length
+      return `
+        ${renderRecordCard(record, 'detail')}
+        <section class="panel">
+          <div class="section-head">
+            <h2 class="section-title">详细信息</h2>
+            <div class="section-subtitle">浏览 ${record.viewCount || 0}</div>
+          </div>
+          <div class="form-grid">
+            <div class="info-box"><label>联系方式</label><div>${escapeHtml(contactText)}</div></div>
+            <div class="info-box"><label>物品描述</label><div>${escapeHtml(record.description || '暂无补充描述')}</div></div>
+            ${record.type === 'found' ? `<div class="info-box"><label>认领申请</label><div>${relatedClaims.length} 条申请，${receivedPending} 条待处理</div></div>` : ''}
+          </div>
+          <div class="actions" style="margin-top:14px;justify-content:flex-start">
+            ${contactVisible ? `<button class="btn ghost" type="button" data-action="copyContact" data-id="${record.id}">复制联系方式</button>` : ''}
+            ${canClaim(record) ? `<button class="btn primary" type="button" data-action="claimStart" data-id="${record.id}">申请认领</button>` : ''}
+            ${isOwner(record) && record.type === 'found' ? `<button class="btn ghost" type="button" data-action="navClaimsReceived">查看申请</button>` : ''}
+            ${isAdmin() && record.auditStatus === 'pending' ? `<button class="btn success" type="button" data-action="approveRecord" data-id="${record.id}">通过审核</button><button class="btn danger" type="button" data-action="rejectRecord" data-id="${record.id}">拒绝</button>` : ''}
+          </div>
+        </section>
+      `
+    }
+
+    function renderClaim() {
+      const record = byId(state.claimId)
+      if (!isLoggedIn()) return renderLoginNudge()
+      if (!record) return renderEmpty('信息不存在', '请选择需要认领的招领信息。')
+      if (!canClaim(record)) {
+        const existing = existingClaimByMe(record.id)
+        return `
+          ${renderRecordCard(record, 'detail')}
+          ${renderEmpty(existing ? '已提交过申请' : '当前不可申请', existing ? '可以在认领申请列表中查看处理进度。' : '该招领信息可能已完成、未通过审核或由你自己发布。', [
+            ['查看申请', 'navClaimsMine', '']
+          ])}
+        `
+      }
+      return `
+        ${pageHero('认领申请', '提交认领证明', '请填写能证明物品归属的细节，发布者通过后才会开放联系方式。')}
+        ${renderRecordCard(record, 'detail')}
+        <section class="panel">
+          <form class="form-grid" id="claimForm">
+            <div class="field"><label><span class="required">*</span>申请理由</label><textarea name="message" maxlength="300" required placeholder="至少 10 个字，说明外观特征、丢失细节或其他证明"></textarea></div>
+            ${uploadBox('proof')}
+            <button class="btn primary" type="submit">提交申请</button>
+          </form>
+        </section>
+      `
+    }
+
+    function renderMy() {
+      if (!isLoggedIn()) {
+        return `
+          <section class="hero alt">
+            <div class="hero-kicker">校园服务入口</div>
+            <h1>登录后进入校园失物招领工作流</h1>
+            <p>普通用户用于发布、认领和跟踪记录；管理员账号用于审核和运营管理。</p>
+          </section>
+          <section class="panel">
+            <div class="form-grid">
+              <button class="btn primary" type="button" data-action="setAccount" data-account="user">演示普通用户</button>
+              <button class="btn ghost" type="button" data-action="setAccount" data-account="admin">演示管理员</button>
+            </div>
+          </section>
+          ${renderPreferencePanel()}
+        `
+      }
+
+      if (isAdmin()) return renderAdminProfile()
+
+      const mine = myRecords()
+      const myClaimCount = state.claims.filter(claim => claim.applicant === 'me').length
+      return `
+        <section class="hero">
+          <div class="hero-profile">
+            <div>
+              <div class="hero-kicker">个人中心</div>
+              <h1>演示普通用户</h1>
+              <p>可发布失物和招领信息，并跟进认领进度。</p>
+            </div>
+            <img class="avatar" src="../miniprogram/assets/images/default-avatar.png" alt="" />
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="section-head"><h2 class="section-title">我的数据</h2><div class="section-subtitle">点击卡片查看记录</div></div>
+          <div class="summary-grid">
+            <button class="summary-item" type="button" data-action="postsFilter" data-type="lost"><div class="summary-value">${mine.filter(r => r.type === 'lost').length}</div><div class="summary-label">失物发布</div></button>
+            <button class="summary-item" type="button" data-action="postsFilter" data-type="found"><div class="summary-value">${mine.filter(r => r.type === 'found').length}</div><div class="summary-label">招领发布</div></button>
+            <button class="summary-item" type="button" data-action="navClaimsMine"><div class="summary-value">${myClaimCount}</div><div class="summary-label">认领申请</div></button>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="section-head"><h2 class="section-title">我的发布状态</h2><div class="section-subtitle">审核与处理</div></div>
+          <div class="menu-section">
+            ${statusMenu('待审核', '刚发布的信息会先等待管理员确认。', 'pendingAudit', 'gold')}
+            ${statusMenu('展示中', '审核通过后进入首页列表。', 'displaying', 'blue')}
+            ${statusMenu('已完成', '找回或认领完成后沉淀为完成状态。', 'completed', 'slate')}
+            ${statusMenu('需修改', '被驳回时可补充信息，再重新提交。', 'rejected', 'rose')}
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="section-head"><h2 class="section-title">我的服务</h2><div class="section-subtitle">记录和平台入口</div></div>
+          <div class="menu-section">
+            ${menuButton('数据', '数据统计', '查看平台整体数据概览', 'slate', 'nav', 'stats')}
+            ${menuButton('申请', '认领申请', '查看我发起和收到的申请', 'blue', 'navClaimsMine')}
+          </div>
+        </section>
+        ${renderPreferencePanel()}
+      `
+    }
+
+    function renderAdminProfile() {
+      const data = overview()
+      return `
+        <section class="hero">
+          <div class="hero-profile">
+            <div>
+              <div class="hero-kicker">管理工作台</div>
+              <h1>演示管理员</h1>
+              <p>后台审核、内容管理和平台数据统一沉淀在管理工作台。</p>
+            </div>
+            <img class="avatar" src="../miniprogram/assets/images/default-avatar.png" alt="" />
+          </div>
+        </section>
+        <section class="panel">
+          <div class="section-head"><h2 class="section-title">管理员工作台</h2><div class="section-subtitle">待处理 ${data.pendingAudit} 条</div></div>
+          <div class="summary-grid">
+            <button class="summary-item" type="button" data-action="adminSection" data-section="pending"><div class="summary-value">${data.pendingAudit}</div><div class="summary-label">待审核</div></button>
+            <button class="summary-item" type="button" data-action="adminSection" data-section="all"><div class="summary-value">${data.totalPosts}</div><div class="summary-label">总发布</div></button>
+            <button class="summary-item" type="button" data-action="nav" data-page="stats"><div class="summary-value">${data.recovered}</div><div class="summary-label">已完成</div></button>
+          </div>
+          <div class="actions" style="margin-top:14px;justify-content:flex-start">
+            <button class="btn primary" type="button" data-action="nav" data-page="admin">进入管理后台</button>
+            <button class="btn ghost" type="button" data-action="nav" data-page="stats">查看平台统计</button>
+          </div>
+        </section>
+        ${renderPreferencePanel()}
+      `
+    }
+
+    function renderPosts() {
+      if (!isLoggedIn()) return renderLoginNudge()
+      const records = filteredMyRecords()
+      const statusFilters = [
+        ['all', '全部状态'],
+        ['pendingAudit', '待审核'],
+        ['displaying', '展示中'],
+        ['completed', '已完成'],
+        ['rejected', '需修改']
+      ]
+      const activeLabel = (statusFilters.find(item => item[0] === state.postsStatus) || statusFilters[0])[1]
+      return `
+        ${pageHero('我的发布', '管理自己的失物与招领', `查看审核状态、编辑内容或删除记录，当前筛选：${activeLabel}。`)}
+        <section class="panel">
+          <div class="tabs">
+            ${['all', 'lost', 'found'].map(key => `<button class="${state.postsType === key ? 'active' : ''}" type="button" data-action="postsType" data-type="${key}">${key === 'all' ? '全部' : typeText[key]}</button>`).join('')}
+          </div>
+          <div style="height:12px"></div>
+          <div class="chip-row">
+            ${statusFilters.map(([key, label]) => `<button class="filter-chip ${state.postsStatus === key ? 'active' : ''}" type="button" data-action="postsStatus" data-status="${key}">${label}</button>`).join('')}
+          </div>
+        </section>
+        <section class="list">
+          ${records.length ? records.map(record => renderRecordCard(record, 'posts')).join('') : renderEmpty(`暂无${activeLabel}发布记录`, '可以发布新的失物或招领信息。', [['去发布', 'nav', 'publish']])}
+        </section>
+      `
+    }
+
+    function renderEdit() {
+      const record = byId(state.editId)
+      if (!record || !isOwner(record)) return renderEmpty('无法编辑', '只能编辑自己发布的信息。')
+      return `
+        ${pageHero('编辑信息', record.type === 'lost' ? '修改失物线索' : '修改招领信息', '保存后内容会重新进入审核流程。')}
+        <section class="panel">
+          <form class="form-grid" id="editForm">
+            <div class="field"><label><span class="required">*</span>物品名称</label><input name="itemName" required value="${escapeHtml(record.itemName)}" /></div>
+            <div class="field"><label><span class="required">*</span>物品分类</label>${categorySelect('category', record.category)}</div>
+            <div class="field"><label><span class="required">*</span>${record.type === 'lost' ? '丢失地点' : '拾取地点'}</label><input name="location" required value="${escapeHtml(record.location)}" /></div>
+            <div class="field"><label><span class="required">*</span>${record.type === 'lost' ? '丢失时间' : '拾取时间'}</label><input name="eventTime" type="date" required value="${escapeHtml(record.eventTime)}" /></div>
+            <div class="field"><label>物品描述</label><textarea name="description" maxlength="500">${escapeHtml(record.description)}</textarea></div>
+            <div class="field"><label><span class="required">*</span>联系方式</label><input name="contactInfo" required value="${escapeHtml(record.contactInfo)}" /></div>
+            ${uploadBox('image', record.imageName)}
+            <button class="btn primary" type="submit">保存修改</button>
+          </form>
+        </section>
+      `
+    }
+
+    function renderClaims() {
+      if (!isLoggedIn()) return renderLoginNudge()
+      const claims = state.claimTab === 'my'
+        ? state.claims.filter(claim => claim.applicant === 'me')
+        : state.claims.filter(claim => isOwner(byId(claim.itemId)))
+      return `
+        ${pageHero('认领申请', '集中处理认领申请', '查看我发起和收到的申请，及时确认联系方式是否开放。')}
+        <section class="panel">
+          <div class="tabs">
+            <button class="${state.claimTab === 'my' ? 'active' : ''}" type="button" data-action="claimTab" data-tab="my">我的申请</button>
+            <button class="${state.claimTab === 'received' ? 'active' : ''}" type="button" data-action="claimTab" data-tab="received">收到的申请</button>
+          </div>
+        </section>
+        <section class="list">
+          ${claims.length ? claims.map(renderClaimCard).join('') : renderEmpty('暂无申请记录', state.claimTab === 'my' ? '你提交的认领申请会显示在这里。' : '别人申请认领你发布的招领信息后会显示在这里。')}
+        </section>
+      `
+    }
+
+    function renderClaimCard(claim) {
+      const record = byId(claim.itemId)
+      const mine = claim.applicant === 'me'
+      const canProcess = !mine && claim.status === 'pending' && record && isOwner(record)
+      const progress = claim.status === 'approved'
+        ? (record && record.contactInfo ? `已同意，可联系发布者：${record.contactInfo}` : '已同意，请按平台提示完成后续领取。')
+        : claim.status === 'rejected'
+          ? '审核未通过，当前不会开放联系方式。'
+          : '申请已提交，请等待发布者处理。'
+      return `
+        <article class="item-card claim-card">
+          <div class="item-title-row">
+            <div>
+              <div class="item-title">${escapeHtml(record ? record.itemName : '相关物品')}</div>
+              <div class="item-desc">${record ? typeText[record.type] : '招领'}认领申请</div>
+            </div>
+            ${tag(claimText[claim.status] || claim.status, claim.status === 'approved' ? 'green' : claim.status === 'rejected' ? 'red' : 'orange')}
+          </div>
+          <div class="claim-message"><strong>${mine ? '申请理由' : '申请人留言'}</strong><br>${escapeHtml(claim.message)}</div>
+          <div class="claim-message"><strong>${mine ? '处理进度' : '处理结果'}</strong><br>${escapeHtml(mine ? progress : ownerClaimResult(claim.status))}</div>
+          ${claim.imageName ? `<div class="file-name">证明图片：${escapeHtml(claim.imageName)}</div>` : ''}
+          <div class="card-footer">
+            <div class="views">${escapeHtml(claim.createTime)}</div>
+            <div class="actions">
+              ${record ? `<button class="btn-small ghost" type="button" data-action="detail" data-id="${record.id}">详情</button>` : ''}
+              ${canProcess ? `<button class="btn-small danger" type="button" data-action="rejectClaim" data-id="${claim.id}">拒绝</button><button class="btn-small success" type="button" data-action="approveClaim" data-id="${claim.id}">同意</button>` : ''}
+            </div>
+          </div>
+        </article>
+      `
+    }
+
+    function ownerClaimResult(status) {
+      if (status === 'approved') return '已通过该申请，系统会向申请人开放发布信息中的联系方式。'
+      if (status === 'rejected') return '已驳回该申请，系统不会向申请人展示联系方式。'
+      return '待处理，确认后可选择同意或拒绝。'
+    }
+
+    function renderAdmin() {
+      if (!isAdmin()) return renderEmpty('无权限访问', '请切换为管理员演示账号后进入管理后台。', [['切换管理员', 'setAccount', 'admin']])
+      const data = overview()
+      const pending = state.records.filter(record => record.auditStatus === 'pending').sort((a, b) => b.createTime.localeCompare(a.createTime))
+      const all = state.records.slice().sort((a, b) => b.createTime.localeCompare(a.createTime))
+      const list = state.adminSection === 'pending' ? pending : all
+      return `
+        ${pageHero('管理后台', '管理后台', '优先处理待审核内容，查看平台发布和找回状态。')}
+        <section class="panel">
+          <div class="summary-grid">
+            <div class="summary-item"><div class="summary-value">${data.totalPosts}</div><div class="summary-label">总发布数</div></div>
+            <div class="summary-item"><div class="summary-value">${data.pendingAudit}</div><div class="summary-label">待审核</div></div>
+            <div class="summary-item"><div class="summary-value">${data.recovered}</div><div class="summary-label">已完成</div></div>
+          </div>
+        </section>
+        <section class="panel">
+          <div class="section-head"><h2 class="section-title">处理规则</h2><div class="section-subtitle">发布与认领</div></div>
+          <div class="rule-list">
+            <div class="rule-item">${tag('发布通过', 'green')}<div class="rule-copy">内容进入首页和详情页，普通用户可以浏览。</div></div>
+            <div class="rule-item">${tag('发布驳回', 'red')}<div class="rule-copy">内容不展示，发布者可在“我的发布”中修改后再提交。</div></div>
+            <div class="rule-item">${tag('认领通过', 'green')}<div class="rule-copy">申请进度变为已同意，并开放发布者联系方式。</div></div>
+          </div>
+        </section>
+        <section class="panel">
+          <div class="tabs">
+            <button class="${state.adminSection === 'pending' ? 'active' : ''}" type="button" data-action="adminTab" data-section="pending">待审核</button>
+            <button class="${state.adminSection === 'all' ? 'active' : ''}" type="button" data-action="adminTab" data-section="all">全部内容</button>
+          </div>
+        </section>
+        <section class="list">
+          ${list.length ? list.map(record => renderRecordCard(record, state.adminSection === 'pending' ? 'adminPending' : 'adminAll')).join('') : renderEmpty('暂无待审核内容', '新提交的失物或招领信息会出现在这里。')}
+        </section>
+      `
+    }
+
+    function renderStats() {
+      const data = overview()
+      const categoryStats = categoryOptions.map(option => ({
+        ...option,
+        count: state.records.filter(record => record.category === option.key).length
+      })).filter(item => item.count > 0).sort((a, b) => b.count - a.count)
+      const maxCategory = Math.max(1, ...categoryStats.map(item => item.count))
+      const locations = Array.from(state.records.reduce((map, record) => {
+        map.set(record.location, (map.get(record.location) || 0) + 1)
+        return map
+      }, new Map()).entries()).map(([location, count]) => ({ location, count })).sort((a, b) => b.count - a.count).slice(0, 5)
+      const trend = [
+        ['4/18', 1, 0],
+        ['4/19', 0, 2],
+        ['4/20', 1, 1],
+        ['4/21', 0, 1],
+        ['4/22', 2, 0],
+        ['4/23', 1, 1],
+        ['4/24', state.records.filter(r => r.createTime.startsWith('2026-04-24') && r.type === 'lost').length, state.records.filter(r => r.createTime.startsWith('2026-04-24') && r.type === 'found').length]
+      ]
+      const maxTrend = Math.max(1, ...trend.flatMap(item => [item[1], item[2]]))
+      return `
+        ${pageHero('数据统计', '平台运营数据概览', '汇总发布、完成、分类、地点和近期趋势。')}
+        <section class="panel">
+          <div class="metric-grid" style="grid-template-columns:repeat(2,1fr)">
+            <div class="metric-card"><div class="metric-value">${data.totalLost}</div><div class="metric-label">失物发布</div></div>
+            <div class="metric-card"><div class="metric-value">${data.totalFound}</div><div class="metric-label">招领发布</div></div>
+            <div class="metric-card"><div class="metric-value">${data.recovered}</div><div class="metric-label">已找回/认领</div></div>
+            <div class="metric-card"><div class="metric-value">${data.recoveryRate}%</div><div class="metric-label">找回率</div></div>
+          </div>
+        </section>
+        <section class="panel">
+          <div class="section-head"><h2 class="section-title">物品分类统计</h2></div>
+          <div class="chart-list">
+            ${categoryStats.map(item => `<div class="bar-row"><span>${item.label}</span><div class="bar-track"><div class="bar-fill" style="--bar:${Math.round(item.count / maxCategory * 100)}%"></div></div><span>${item.count}</span></div>`).join('')}
+          </div>
+        </section>
+        <section class="panel">
+          <div class="section-head"><h2 class="section-title">热门地点 TOP5</h2></div>
+          <div class="rank-list">
+            ${locations.map((item, index) => `<div class="rank-item"><div class="rank-num">${index + 1}</div><div class="rank-name">${escapeHtml(item.location)}</div><div class="rank-count">${item.count} 次</div></div>`).join('')}
+          </div>
+        </section>
+        <section class="panel">
+          <div class="section-head"><h2 class="section-title">近期趋势</h2><div class="section-subtitle">黄：失物 · 蓝：招领</div></div>
+          <div class="trend-chart">
+            ${trend.map(([date, lost, found]) => `<div class="trend-item"><span>${date}</span><div class="trend-bars"><div class="trend-bar lost" style="height:${Math.max(4, Math.round(lost / maxTrend * 106))}px"></div><div class="trend-bar found" style="height:${Math.max(4, Math.round(found / maxTrend * 106))}px"></div></div><span>${lost}/${found}</span></div>`).join('')}
+          </div>
+        </section>
+      `
+    }
+
+    function renderPrivacy() {
+      return `
+        ${pageHero('数据与隐私说明', '数据与隐私说明', '说明演示数据、联系方式展示和图片使用边界。')}
+        <section class="panel">
+          <div class="menu-section">
+            <div class="menu-item"><div class="menu-icon blue">数据</div><div class="menu-meta"><div class="menu-text">本地演示数据</div><div class="menu-desc">当前 HTML 仅把演示记录保存在浏览器 localStorage 中。</div></div></div>
+            <div class="menu-item"><div class="menu-icon gold">联系</div><div class="menu-meta"><div class="menu-text">联系方式开放</div><div class="menu-desc">失物联系信息在审核通过且寻找中时可见；招领联系信息在认领通过后向申请人开放。</div></div></div>
+            <div class="menu-item"><div class="menu-icon rose">图片</div><div class="menu-meta"><div class="menu-text">图片选择</div><div class="menu-desc">网页 demo 只记录文件名，不会上传或读取真实图片内容。</div></div></div>
+          </div>
+        </section>
+      `
+    }
+
+    function renderPreferencePanel() {
+      return `
+        <section class="panel">
+          <div class="section-head"><h2 class="section-title">偏好设置</h2><div class="section-subtitle">主题、说明和隐私</div></div>
+          <div class="menu-section">
+            ${menuButton('主题', state.theme === 'light' ? '切换深色模式' : '切换浅色模式', `当前主题：${state.theme === 'light' ? '浅色' : '深色'}`, 'blue', 'toggleTheme')}
+            ${menuButton('关于', '关于我们', '校园失物招领小程序 · 版本 1.2.0', 'slate', 'about')}
+            ${menuButton('隐私', '数据与隐私说明', '查看隐私收集和使用说明', 'gold', 'nav', 'privacy')}
+            ${menuButton('协议', '打开官方隐私协议', '模拟微信原生隐私协议入口', 'rose', 'officialPrivacy')}
+            ${menuButton('接口', '接口地址', 'https://api.example.com/lost-found', 'blue', 'copyBaseUrl')}
+            ${menuButton('重置', '重置演示数据', '恢复默认示例记录', 'blue', 'resetData')}
+            ${isLoggedIn() ? menuButton('退出', '退出登录', '清除当前演示账号会话', 'rose', 'logout') : ''}
+          </div>
+        </section>
+      `
+    }
+
+    function renderLoginNudge() {
+      return `
+        <section class="state-panel">
+          <div class="state-title">请先登录</div>
+          <p class="state-desc">登录后可以发布信息、提交认领申请并查看处理进度。</p>
+          <div class="state-actions">
+            <button class="btn primary" type="button" data-action="setAccount" data-account="user">演示普通用户</button>
+            <button class="btn ghost" type="button" data-action="setAccount" data-account="admin">演示管理员</button>
+          </div>
+        </section>
+      `
+    }
+
+    function renderEmpty(title, desc, actions = []) {
+      return `
+        <section class="state-panel">
+          <div class="state-title">${escapeHtml(title)}</div>
+          <p class="state-desc">${escapeHtml(desc || '')}</p>
+          ${actions.length ? `<div class="state-actions">${actions.map(([label, action, value]) => {
+            const extra = action === 'nav' ? `data-page="${value}"` : action === 'publishPreset' ? `data-type="${value}"` : action === 'setAccount' ? `data-account="${value}"` : ''
+            return `<button class="btn primary" type="button" data-action="${action}" ${extra}>${escapeHtml(label)}</button>`
+          }).join('')}</div>` : ''}
+        </section>
+      `
+    }
+
+    function categorySelect(name, selected) {
+      return `
+        <select name="${name}">
+          ${categoryOptions.map(item => `<option value="${item.key}" ${selected === item.key ? 'selected' : ''}>${item.label}</option>`).join('')}
+        </select>
+      `
+    }
+
+    function uploadBox(name, fileName = '') {
+      return `
+        <label class="upload-box">
+          <strong>+</strong>
+          <span>添加图片，最多 3 张</span>
+          <span class="file-name">${fileName ? `当前：${escapeHtml(fileName)}` : '仅记录文件名用于演示'}</span>
+          <input name="${name}" type="file" accept="image/*" style="display:none" />
+        </label>
+      `
+    }
+
+    function menuButton(icon, text, desc, tone, action, page = '') {
+      return `
+        <button class="menu-item" type="button" data-action="${action}" ${page ? `data-page="${page}"` : ''}>
+          <span class="menu-icon ${tone}">${escapeHtml(icon)}</span>
+          <span class="menu-meta"><span class="menu-text">${escapeHtml(text)}</span><span class="menu-desc">${escapeHtml(desc)}</span></span>
+          <span class="menu-arrow">›</span>
+        </button>
+      `
+    }
+
+    function statusMenu(title, desc, status, tone) {
+      const count = filteredStatusCount(status)
+      return `
+        <button class="menu-item" type="button" data-action="postsStatusShortcut" data-status="${status}">
+          <span class="menu-icon ${tone}">${count}</span>
+          <span class="menu-meta"><span class="menu-text">${title}</span><span class="menu-desc">${desc}</span></span>
+          <span class="menu-arrow">›</span>
+        </button>
+      `
+    }
+
+    function filteredStatusCount(status) {
+      return myRecords().filter(record => {
+        if (status === 'pendingAudit') return record.auditStatus === 'pending'
+        if (status === 'displaying') return record.auditStatus === 'approved' && ((record.type === 'lost' && record.status === 'searching') || (record.type === 'found' && record.status === 'pending'))
+        if (status === 'completed') return record.status === 'found' || record.status === 'claimed'
+        if (status === 'rejected') return record.auditStatus === 'rejected'
+        return true
+      }).length
+    }
+
+    function renderTabbar() {
+      const tabs = [
+        ['home', '首页', 'home'],
+        ['publish', '发布', 'publish'],
+        ['my', isAdmin() ? '管理' : '我的', 'my']
+      ]
+      return tabs.map(([page, label, iconName]) => {
+        const active = state.page === page || (page === 'my' && ['posts', 'claims', 'admin', 'stats', 'privacy'].includes(state.page))
+        return `<button class="${active ? 'active' : ''}" type="button" data-action="navTab" data-page="${page}"><span class="tab-icon ${iconName}"></span><span>${label}</span></button>`
+      }).join('')
+    }
+
+    function render() {
+      document.getElementById('phone').classList.toggle('dark', state.theme === 'dark')
+      document.getElementById('title').textContent = state.page === 'my' && isAdmin() ? '管理中心' : (titles[state.page] || '校园失物招领')
+      document.getElementById('roleText').textContent = accountLabel()
+      document.getElementById('backBtn').classList.toggle('is-disabled', state.history.length === 0 && state.page === 'home')
+      document.getElementById('tabbar').innerHTML = renderTabbar()
+      document.getElementById('tools').classList.toggle('show', state.toolsOpen)
+      renderModal()
+
+      const views = {
+        home: renderHome,
+        search: renderSearch,
+        publish: renderPublish,
+        detail: renderDetail,
+        claim: renderClaim,
+        my: renderMy,
+        posts: renderPosts,
+        edit: renderEdit,
+        claims: renderClaims,
+        admin: renderAdmin,
+        stats: renderStats,
+        privacy: renderPrivacy
+      }
+      document.getElementById('app').innerHTML = (views[state.page] || renderHome)()
+    }
+
+    function formText(form, name) {
+      return String(new FormData(form).get(name) || '').replace(/\s+/g, ' ').trim()
+    }
+
+    function formMultiline(form, name) {
+      return String(new FormData(form).get(name) || '').trim()
+    }
+
+    function fileName(form, name, fallback = '') {
+      const input = form.elements[name]
+      return input && input.files && input.files[0] ? input.files[0].name : fallback
+    }
+
+    function copyText(text, okMessage) {
+      if (!text) {
+        toast('当前没有可复制的内容')
+        return
+      }
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(() => toast(okMessage)).catch(() => toast(text))
+        return
+      }
+      toast(text)
+    }
+
+    function approveRecord(id) {
+      const record = byId(id)
+      if (!record) return
+      record.auditStatus = 'approved'
+      saveData()
+      toast('已通过')
+      render()
+    }
+
+    function rejectRecord(id) {
+      const record = byId(id)
+      if (!record) return
+      record.auditStatus = 'rejected'
+      saveData()
+      toast('已拒绝')
+      render()
+    }
+
+    function deleteRecord(id) {
+      const record = byId(id)
+      if (!record) return
+      if (!isAdmin() && !isOwner(record)) {
+        toast('只能删除自己的发布')
+        return
+      }
+      if (!window.confirm('确定要删除该信息吗？')) return
+      state.records = state.records.filter(item => item.id !== id)
+      state.claims = state.claims.filter(claim => claim.itemId !== id)
+      saveData()
+      toast('删除成功')
+      if (state.page === 'detail') navigate('home', {}, false)
+      else render()
+    }
+
+    function completeRecord(id) {
+      const record = byId(id)
+      if (!record || !isOwner(record)) return
+      record.status = record.type === 'lost' ? 'found' : 'claimed'
+      saveData()
+      toast(record.type === 'lost' ? '已标记找回' : '已标记认领')
+      render()
+    }
+
+    function processClaim(id, status) {
+      const claim = state.claims.find(item => item.id === id)
+      if (!claim) return
+      const record = byId(claim.itemId)
+      if (!record || !isOwner(record)) {
+        toast('只能处理自己收到的申请')
+        return
+      }
+      claim.status = status
+      saveData()
+      toast(status === 'approved' ? '已同意' : '已拒绝')
+      render()
+    }
+
+    document.addEventListener('click', event => {
+      const target = event.target.closest('[data-action]')
+      if (!target) return
+      const action = target.dataset.action
+      const id = target.dataset.id
+
+      if (action === 'nav') navigate(target.dataset.page)
+      if (action === 'navTab') {
+        state.history = []
+        navigate(target.dataset.page, {}, false)
+      }
+      if (action === 'closeTools') {
+        state.toolsOpen = false
+        render()
+      }
+      if (action === 'closeModal') closeModal()
+      if (action === 'setAccount') {
+        state.account = target.dataset.account || ''
+        state.toolsOpen = false
+        saveData()
+        toast(state.account ? `已切换为${accountLabel()}` : '已切换为访客')
+        render()
+      }
+      if (action === 'logout') {
+        state.account = ''
+        saveData()
+        toast('已退出登录')
+        render()
+      }
+      if (action === 'toggleTheme') {
+        state.theme = state.theme === 'light' ? 'dark' : 'light'
+        saveData()
+        toast(state.theme === 'light' ? '已切换浅色模式' : '已切换深色模式')
+        render()
+      }
+      if (action === 'resetData') resetData()
+      if (action === 'homeType') {
+        state.homeType = target.dataset.type
+        render()
+      }
+      if (action === 'homeCategory') {
+        state.homeCategory = target.dataset.category
+        render()
+      }
+      if (action === 'searchType') {
+        state.searchType = target.dataset.type
+        render()
+      }
+      if (action === 'searchCategory') {
+        state.searchCategory = target.dataset.category
+        render()
+      }
+      if (action === 'searchStatus') {
+        state.searchStatus = target.dataset.status
+        render()
+      }
+      if (action === 'resetSearch') {
+        state.searchKeyword = ''
+        state.searchType = 'all'
+        state.searchCategory = ''
+        state.searchStatus = 'displaying'
+        render()
+      }
+      if (action === 'publishSwitch') {
+        state.publishType = target.dataset.type
+        render()
+      }
+      if (action === 'publishPreset') {
+        state.publishType = target.dataset.type || 'lost'
+        navigate('publish')
+      }
+      if (action === 'detail') {
+        const record = byId(id)
+        if (record) {
+          record.viewCount = (record.viewCount || 0) + 1
+          saveData()
+        }
+        navigate('detail', { id })
+      }
+      if (action === 'claimStart') {
+        if (!isLoggedIn()) {
+          toast('请先登录')
+          navigate('my')
+          return
+        }
+        navigate('claim', { id })
+      }
+      if (action === 'copyContact') {
+        const record = byId(id)
+        if (!record) return
+        if (!canCopyContact(record)) {
+          toast(record.type === 'found' ? '认领通过后可见' : '当前状态暂不可联系')
+          return
+        }
+        copyText(record.contactInfo, '已复制联系方式')
+      }
+      if (action === 'postsFilter') {
+        navigate('posts', { postsType: target.dataset.type || 'all', postsStatus: 'all' })
+      }
+      if (action === 'postsStatusShortcut') {
+        navigate('posts', { postsType: 'all', postsStatus: target.dataset.status })
+      }
+      if (action === 'postsType') {
+        state.postsType = target.dataset.type
+        render()
+      }
+      if (action === 'postsStatus') {
+        state.postsStatus = target.dataset.status
+        render()
+      }
+      if (action === 'editStart') navigate('edit', { id })
+      if (action === 'completeRecord') completeRecord(id)
+      if (action === 'deleteRecord') deleteRecord(id)
+      if (action === 'approveRecord') approveRecord(id)
+      if (action === 'rejectRecord') rejectRecord(id)
+      if (action === 'navClaimsMine') navigate('claims', { claimTab: 'my' })
+      if (action === 'navClaimsReceived') navigate('claims', { claimTab: 'received' })
+      if (action === 'claimTab') {
+        state.claimTab = target.dataset.tab
+        render()
+      }
+      if (action === 'approveClaim') processClaim(id, 'approved')
+      if (action === 'rejectClaim') processClaim(id, 'rejected')
+      if (action === 'adminSection') navigate('admin', { adminSection: target.dataset.section })
+      if (action === 'adminTab') {
+        state.adminSection = target.dataset.section
+        render()
+      }
+      if (action === 'about') {
+        openModal('关于我们', '<p>校园失物招领小程序<br>版本：1.2.0<br>当前模式：本地交互演示</p><p>用于快速发布失物和招领信息，并为管理员提供独立审核与运营工作台。</p>')
+      }
+      if (action === 'officialPrivacy') {
+        openModal('官方隐私协议', '<p>这里模拟微信原生隐私协议入口。真实小程序中会调用平台提供的隐私协议弹窗。</p>')
+      }
+      if (action === 'copyBaseUrl') copyText('https://api.example.com/lost-found', '接口地址已复制')
+    })
+
+    document.addEventListener('submit', event => {
+      event.preventDefault()
+      const form = event.target
+
+      if (form.id === 'searchForm') {
+        state.searchKeyword = formText(form, 'keyword')
+        render()
+      }
+
+      if (form.id === 'publishForm') {
+        if (!isLoggedIn()) {
+          toast('请先登录')
+          navigate('my')
+          return
+        }
+        const itemName = formText(form, 'itemName')
+        const location = formText(form, 'location')
+        const contactInfo = formText(form, 'contactInfo')
+        if (!itemName || !location || !contactInfo) {
+          toast('请完善必填信息')
+          return
+        }
+        const type = state.publishType
+        const record = {
+          id: uid('r'),
+          owner: 'me',
+          type,
+          itemName,
+          category: new FormData(form).get('category') || 'others',
+          location,
+          eventTime: new FormData(form).get('eventTime') || today(),
+          description: formMultiline(form, 'description'),
+          contactInfo,
+          images: [],
+          imageName: fileName(form, 'image'),
+          auditStatus: 'pending',
+          status: type === 'lost' ? 'searching' : 'pending',
+          viewCount: 0,
+          createTime: nowText()
+        }
+        state.records.unshift(record)
+        state.postsType = 'all'
+        state.postsStatus = 'pendingAudit'
+        saveData()
+        toast('提交成功，等待审核')
+        navigate('posts')
+      }
+
+      if (form.id === 'editForm') {
+        const record = byId(state.editId)
+        if (!record || !isOwner(record)) return
+        const itemName = formText(form, 'itemName')
+        const location = formText(form, 'location')
+        const contactInfo = formText(form, 'contactInfo')
+        if (!itemName || !location || !contactInfo) {
+          toast('请完善必填信息')
+          return
+        }
+        record.itemName = itemName
+        record.category = new FormData(form).get('category') || record.category
+        record.location = location
+        record.eventTime = new FormData(form).get('eventTime') || record.eventTime
+        record.description = formMultiline(form, 'description')
+        record.contactInfo = contactInfo
+        record.imageName = fileName(form, 'image', record.imageName)
+        record.auditStatus = 'pending'
+        record.createTime = nowText()
+        if (record.type === 'lost' && record.status === 'found') record.status = 'searching'
+        if (record.type === 'found' && record.status === 'claimed') record.status = 'pending'
+        state.postsStatus = 'pendingAudit'
+        saveData()
+        toast('修改已提交，等待审核')
+        navigate('posts')
+      }
+
+      if (form.id === 'claimForm') {
+        const record = byId(state.claimId)
+        if (!record || !canClaim(record)) {
+          toast('当前无法提交认领')
+          return
+        }
+        const message = formMultiline(form, 'message')
+        if (message.length < 10) {
+          toast('申请理由至少 10 个字')
+          return
+        }
+        state.claims.unshift({
+          id: uid('c'),
+          itemId: record.id,
+          applicant: 'me',
+          message,
+          imageName: fileName(form, 'proof'),
+          status: 'pending',
+          createTime: nowText()
+        })
+        state.claimTab = 'my'
+        saveData()
+        toast('申请已提交')
+        navigate('claims')
+      }
+    })
+
+    document.addEventListener('change', event => {
+      const input = event.target
+      if (input.type === 'file' && input.files && input.files[0]) {
+        const label = input.closest('.upload-box')
+        const name = label && label.querySelector('.file-name')
+        if (name) name.textContent = `已选择：${input.files[0].name}`
+      }
+    })
+
+    document.getElementById('toolsBtn').addEventListener('click', () => {
+      state.toolsOpen = true
+      render()
+    })
+
+    document.getElementById('backBtn').addEventListener('click', () => {
+      back()
+    })
+
+    document.getElementById('tools').addEventListener('click', event => {
+      if (event.target.id === 'tools') {
+        state.toolsOpen = false
+        render()
+      }
+    })
+
+    document.getElementById('modal').addEventListener('click', event => {
+      if (event.target.id === 'modal') closeModal()
+    })
+
+    loadData()
+    render()
+  </script>
+</body>
+</html>
